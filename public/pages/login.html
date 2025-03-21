@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Education Management</title>
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+    <div class="wrapper wrapper-login">
+        <div class="content-login">
+            <form id="cms_bm_frm_login" method="post">
+                <div class="logo-ptit-1 justify-content-center d-flex mt-5">
+                    <img src="/images/logo-ptit-1.svg" class="img-logo-w" alt="Logo" width="200%" height="200%" />
+                </div>
+                <!-- content -->
+                <div class="content-form-login position-relative">
+                    <h2 class="text-center title-h2 text-uppercase color-dask-blue fw-bold">Đăng nhập</h2>
+                    <div class="form-item position-relative mb-20">
+                        <label for="username" class="form-label"><i
+                                class="fal fa-user fa-solid color-dask-blue"></i></label>
+                        <input name="username" type="text" id="username" class="form-control"
+                            aria-describedby="Nhập tài khoản hoặc email" placeholder="Nhập tài khoản hoặc email" />
+                    </div>
+                    <div class="form-item position-relative mb-20">
+                        <label for="password" class="form-label"><i
+                                class="fal fa-solid fa-lock color-dask-blue"></i></label>
+                        <input name="password" id="password" type="password" class="form-control"
+                            placeholder="Nhập mật khẩu" />
+                        <span class="show-pass"><i class="fal fa-solid fa-eye-slash"></i></span>
+                        <span class="hide-pass"><i class="fal fa-solid fa-eye"></i></span>
+                    </div>
+                    <div class="help-forgot d-flex justify-content-between mb-20">
+                        <a class="forgot-pass color-dask-blue" href="pages/forgetpass.aspx">Quên mật khẩu</a>
+                        <a href="#" class="help color-dask-blue"><i class="fal fa-regular fa-circle-question"></i>
+                            Trợ giúp!</a>
+                    </div>
+                    <input type="submit" name="cms_authenticate_do_login" value="Đăng nhập"
+                        id="cms_authenticate_do_login" class="btn btn-primary btn-login" />
+                    <!-- Thêm phần hiển thị thông báo lỗi -->
+                    <p id="message" style="color: red; text-align: center; margin-top: 10px;"></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('cms_bm_frm_login').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageElement = document.getElementById('message');
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json(); // Dùng await để đợi cho quá trình đọc json hoàn tất
+
+                if (response.ok) {
+                    // Lưu token vào localStorage để sử dụng cho các trang bảo vệ
+                    localStorage.setItem('token', data.token);
+                    // Chuyển hướng đến index.html
+                    window.location.href = '/index.html';
+                } else {
+                    // Hiển thị thông báo lỗi từ server
+                    messageElement.innerText = data.message || 'Đăng nhập thất bại.'; // Nếu không có message thì hiển thị Đăng nhập thất bại
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                messageElement.innerText = 'Có lỗi xảy ra. Vui lòng thử lại.';
+            }
+        });
+
+        // Xử lý hiển thị/ẩn mật khẩu
+        const showPass = document.querySelector('.show-pass');
+        const hidePass = document.querySelector('.hide-pass');
+        const passwordInput = document.querySelector('#password');
+
+        showPass.addEventListener('click', () => {
+            passwordInput.type = 'text';
+            showPass.style.display = 'none';
+            hidePass.style.display = 'block';
+        });
+
+        hidePass.addEventListener('click', () => {
+            passwordInput.type = 'password';
+            showPass.style.display = 'block';
+            hidePass.style.display = 'none';
+        });
+    </script>
+</body>
+
+</html>

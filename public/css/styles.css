@@ -1,0 +1,49 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-family: Lato, sans-serif;
+    scroll-behavior: smooth;
+}
+
+.home-page {
+    margin: 60px !important;
+}
+
+.main-panel {}
+
+.main-panel,
+.work-progress {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.work-progress {
+    right: 0;
+    height: 622px;
+    padding: 24px;
+    margin-right: 60px;
+}
+
+.body-panel .card {
+    text-decoration: none;
+}
+
+.body-panel .card-text {
+    white-space: nowrap;
+    /* Không cho phép xuống dòng */
+    overflow: hidden;
+    /* Ẩn nội dung bị vượt quá */
+    text-overflow: ellipsis;
+    /*hiển thị dấu ... nếu quá kí tự*/
+    width: 260px;
+}
+
+.card-item:hover {
+    background-color: transparent;
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.2);
+    border-color: transparent;
+}
