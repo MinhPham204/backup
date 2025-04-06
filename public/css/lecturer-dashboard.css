@@ -1,0 +1,131 @@
+.lecturer-dashboard {
+    padding: 20px 0;
+}
+
+.semester-selector {
+    margin-bottom: 20px;
+}
+
+.class-card {
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.class-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.class-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.class-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.class-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.subject-list {
+    padding: 15px;
+}
+
+.subject-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.subject-item:last-child {
+    border-bottom: none;
+}
+
+.subject-item:hover {
+    background-color: #f8f9fa;
+}
+
+.subject-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.subject-details {
+    display: flex;
+    justify-content: space-between;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.subject-actions {
+    margin-top: 10px;
+}
+
+.badge-custom {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
+
+.filter-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.filter-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.stats-card {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.stats-card .stats-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.stats-card .stats-number {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.stats-card .stats-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .subject-details {
+        flex-direction: column;
+    }
+    
+    .subject-details span {
+        margin-bottom: 5px;
+    }
+} 

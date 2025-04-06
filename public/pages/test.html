@@ -4,220 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phân công đề tài</title>
-    <link rel="stylesheet" href="/css/work-space.css">
+    <title>Chi tiết nhóm</title>
+    <link rel="stylesheet" href="/public/css/group-page.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-        .nav-link[contenteditable] {
-            outline: none;
-            padding: 0.5rem 1rem;
-            display: inline-block;
-            min-width: 100px;
-            /* Đảm bảo tab có kích thước tối thiểu */
-        }
-    </style>
 </head>
 
-<body class="container mt-4">
-    <h2 class="fw-bold">Công việc hàng tuần</h2>
-
-    <!-- Nút thêm tab -->
-    <button class="btn btn-primary my-3" onclick="themTab()">Thêm tab +</button>
-
-    <!-- Tab navigation -->
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <span class="nav-link active" id="tab-1" data-bs-toggle="tab" data-bs-target="#content-1" role="tab"
-                aria-controls="content-1" aria-selected="true" contenteditable="true">Tab 1</span>
-            <button class="btn btn-sm btn-danger ms-1" onclick="xoaTab(1)"><i class="fa-solid fa-trash"></i></button>
-        </li>
-    </ul>
-
-    <!-- Tab content -->
-    <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="content-1" role="tabpanel" aria-labelledby="tab-1">
-            <button class="btn btn-primary my-3" onclick="themBang(this)">Công việc mới +</button>
-            <div class="bangCongViec"></div>
+<body>
+    <div class="container mt-5 mb-5">
+        <h2 class="text-center mb-4">Chi tiết nhóm</h2>
+        <div id="groupDetail" class="border p-4 rounded">
+            <!-- Dữ liệu chi tiết nhóm sẽ được hiển thị ở đây -->
         </div>
     </div>
 
-    <script>
-        let tabCount = 1;
-
-        function themTab() {
-            tabCount++;
-
-            // Thêm tab navigation
-            const tabList = document.getElementById('myTab');
-            const newTab = document.createElement('li');
-            newTab.className = 'nav-item';
-            newTab.role = 'presentation';
-            newTab.innerHTML = `
-                <span class="nav-link" id="tab-${tabCount}" data-bs-toggle="tab" 
-                    data-bs-target="#content-${tabCount}" role="tab" 
-                    aria-controls="content-${tabCount}" aria-selected="false" contenteditable="true">Tab ${tabCount}</span>
-                <button class="btn btn-sm btn-danger ms-1" onclick="xoaTab(${tabCount})">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            `;
-            tabList.appendChild(newTab);
-
-            // Thêm tab content
-            const tabContent = document.getElementById('myTabContent');
-            const newContent = document.createElement('div');
-            newContent.className = 'tab-pane fade';
-            newContent.id = `content-${tabCount}`;
-            newContent.role = 'tabpanel';
-            newContent.setAttribute('aria-labelledby', `tab-${tabCount}`);
-            newContent.innerHTML = `
-                <button class="btn btn-primary my-3" onclick="themBang(this)">Công việc mới +</button>
-                <div class="bangCongViec"></div>
-            `;
-            tabContent.appendChild(newContent);
-
-            // Kích hoạt tab mới
-            new bootstrap.Tab(newTab.querySelector('.nav-link')).show();
-        }
-
-        function xoaTab(tabNumber) {
-            const tabList = document.getElementById('myTab');
-            const tabContent = document.getElementById('myTabContent');
-            const tabToRemove = document.querySelector(`#tab-${tabNumber}`).parentElement;
-            const contentToRemove = document.querySelector(`#content-${tabNumber}`);
-            const isActive = tabToRemove.querySelector('.nav-link').classList.contains('active');
-
-            // Xóa tab và nội dung
-            tabList.removeChild(tabToRemove);
-            tabContent.removeChild(contentToRemove);
-
-            // Nếu tab bị xóa là tab đang active, chuyển sang tab khác
-            if (isActive && tabList.children.length > 0) {
-                const firstTab = tabList.querySelector('.nav-link');
-                new bootstrap.Tab(firstTab).show();
-            }
-
-            // Nếu không còn tab nào, reset tabCount
-            if (tabList.children.length === 0) {
-                tabCount = 0;
-            }
-        }
-
-        function themBang(button) {
-            let container = button.nextElementSibling;
-            let bangMoi = document.createElement('div');
-            bangMoi.className = 'card p-3 mb-5';
-            bangMoi.innerHTML = `
-                <h5 contenteditable="true" class="work-title fw-bold" style="width:98%"></h5>
-                <table class="table table-bordered">
-                <button class="btn btn-del-table" onclick="xoaBang(this)" disabled>
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" onclick="toggleAll(this, this.closest('.card'))"></th>
-                            <th>Công việc</th>
-                            <th>Người thực hiện</th>
-                            <th>Trạng thái</th>
-                            <th>Ngày bắt đầu</th>
-                            <th>Ngày đến hạn</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="checkbox" onclick="checkSelection(this)"></td>
-                            <td contenteditable="true"></td>
-                            <td contenteditable="true"></td>
-                            <td>
-                            <select class="form-select" onchange="capNhatMauTrangThai(this)">
-                                <option value="Chưa bắt đầu" class="bg-secondary text-white">Chưa bắt đầu</option>
-                                <option value="Đang thực hiện" class="bg-warning text-dark">Đang thực hiện</option>
-                                <option value="Hoàn thành" class="bg-success text-white">Hoàn thành</option>
-                                <option value="Đã hủy" class="bg-danger text-white">Đã hủy</option>
-                            </select>
-                        </td>
-                            <td><input type="date"></td>
-                            <td><input type="date"></td>
-                            <td><button class="btn btn-danger btn-sm" onclick="xoaDong(this)" disabled>Xóa</button></td>
-                        </tr>
-                    </tbody>
-                    <button class="btn btn-addline btn-sm" onclick="themHang(this)">+ Thêm hàng</button>
-                </table>
-            `;
-            container.appendChild(bangMoi);
-        }
-
-        // Các hàm còn lại giữ nguyên
-        function xoaBang(button) {
-            button.parentElement.remove();
-        }
-
-        function themHang(button) {
-            let table = button.nextElementSibling;
-            let tbody = table.querySelector("tbody");
-            let dongMoi = document.createElement("tr");
-            dongMoi.innerHTML = `
-                <td><input type="checkbox" onclick="checkSelection(this)"></td>
-                <td contenteditable="true"></td>
-                <td contenteditable="true"></td>
-                <td>
-                    <select class="form-select" onchange="capNhatMauTrangThai(this)">
-                        <option value="Chưa bắt đầu" class="bg-secondary text-white">Chưa bắt đầu</option>
-                        <option value="Đang thực hiện" class="bg-warning text-dark">Đang thực hiện</option>
-                        <option value="Hoàn thành" class="bg-success text-white">Hoàn thành</option>
-                        <option value="Đã hủy" class="bg-danger text-white">Đã hủy</option>
-                    </select>
-                </td>
-                <td><input type="date"></td>
-                <td><input type="date"></td>
-                <td><button class="btn btn-danger btn-sm" onclick="xoaDong(this)" disabled>Xóa</button></td>
-            `;
-            tbody.appendChild(dongMoi);
-        }
-
-        function xoaDong(button) {
-            let row = button.parentElement.parentElement;
-            row.remove();
-        }
-
-        function toggleAll(source, card) {
-            let checkboxes = card.querySelectorAll("tbody input[type='checkbox']");
-            checkboxes.forEach(cb => {
-                cb.checked = source.checked;
-                checkSelection(cb);
-            });
-            checkTableSelection(card);
-        }
-
-        function checkSelection(checkbox) {
-            let row = checkbox.closest("tr");
-            let deleteBtn = row.querySelector("button");
-            deleteBtn.disabled = !checkbox.checked;
-            checkTableSelection(checkbox.closest(".card"));
-        }
-
-        function checkTableSelection(card) {
-            let checkboxes = card.querySelectorAll("tbody input[type='checkbox']");
-            let checkedBoxes = card.querySelectorAll("tbody input[type='checkbox']:checked");
-            let deleteTableBtn = card.querySelector(".btn-del-table");
-            deleteTableBtn.disabled = checkedBoxes.length !== checkboxes.length;
-        }
-
-        function capNhatMauTrangThai(select) {
-            let colors = {
-                "Chưa bắt đầu": "bg-secondary text-white",
-                "Đang thực hiện": "bg-warning text-dark",
-                "Hoàn thành": "bg-success text-white",
-                "Đã hủy": "bg-danger text-white"
-            };
-            select.className = "form-select " + colors[select.value];
-        }
-    </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Giả lập dữ liệu nhóm
+        const group = {
+            id: 1,
+            name: "Nhóm 1",
+            leader: "Nguyễn Văn A",
+            members: 5,
+            status: "ASSIGNED",  // Trạng thái có thể là ASSIGNED, NOT_ASSIGNED, COMPLETED
+            date: "2025-05-10",  // Ngày thuyết trình
+            notes: "Nhóm đang tiến hành thuyết trình và chuẩn bị tài liệu cho buổi thuyết trình cuối kỳ."
+        };
+
+        // Hiển thị thông tin nhóm
+        const groupDetail = document.getElementById("groupDetail");
+
+        groupDetail.innerHTML = `
+            <h4>${group.name}</h4>
+            <p><strong>Trưởng nhóm:</strong> ${group.leader}</p>
+            <p><strong>Số thành viên:</strong> ${group.members}</p>
+            <p><strong>Trạng thái nhóm:</strong> 
+                <span class="badge ${group.status === 'ASSIGNED' ? 'bg-success' : group.status === 'NOT_ASSIGNED' ? 'bg-warning' : 'bg-info'}">
+                    ${group.status === 'ASSIGNED' ? 'Đã phân công' : group.status === 'NOT_ASSIGNED' ? 'Chưa phân công' : 'Hoàn thành'}
+                </span>
+            </p>
+            <p><strong>Ngày thuyết trình:</strong> ${group.date ? group.date : "Chưa có lịch trình"}</p>
+            <p><strong>Ghi chú:</strong> ${group.notes}</p>
+            <a href="group-page.html" class="btn btn-primary">Quay lại danh sách nhóm</a>
+        `;
+    </script>
 </body>
 
 </html>

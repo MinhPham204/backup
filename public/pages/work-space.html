@@ -30,9 +30,9 @@
                     </button>
                     <thead>
                         <tr>
-                            <th><input type="checkbox" onclick="toggleAll(this, this.closest('.card'))"></th>
+                            <th ><input type="checkbox" onclick="toggleAll(this, this.closest('.card'))"></th>
                             <th>Công việc</th>
-                            <th>Người thực hiện</th>
+                            <th class="table-performer">Người thực hiện</th>
                             <th>Trạng thái</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày đến hạn</th>
@@ -42,9 +42,9 @@
                     <tbody>
                         <tr>
                             <td><input type="checkbox" onclick="checkSelection(this)"></td>
-                            <td contenteditable="true"></td>
-                            <td contenteditable="true"></td>
-                            <td>
+                            <td class="td-work" contenteditable="true"></td>
+                            <td class="td-work" contenteditable="true"></td>
+                            <td class="td-status">
                             <select class="form-select" onchange="capNhatMauTrangThai(this)">
                                 <option value="Chưa bắt đầu" class="bg-secondary text-white">Chưa bắt đầu</option>
                                 <option value="Đang thực hiện" class="bg-warning text-dark">Đang thực hiện</option>
@@ -52,8 +52,8 @@
                                 <option value="Đã hủy" class="bg-danger text-white">Đã hủy</option>
                             </select>
                         </td>
-                            <td><input type="date"></td>
-                            <td><input type="date"></td>
+                            <td class="td-date"><input class="form-control" type="date"></td>
+                            <td class="td-date"><input class="form-control" type="date"></td>
                             <td><button class="btn btn-danger btn-sm" onclick="xoaDong(this)" disabled>Xóa</button></td>
                         </tr>
                     </tbody>
@@ -74,8 +74,8 @@
             let dongMoi = document.createElement("tr");
             dongMoi.innerHTML = `
                 <td><input type="checkbox" onclick="checkSelection(this)"></td>
-                <td contenteditable="true"></td>
-                <td contenteditable="true"></td>
+                <td class="td-work" contenteditable="true"></td>
+                <td class="td-work" contenteditable="true"></td>
                 <td>
                     <select class="form-select" onchange="capNhatMauTrangThai(this)">
                         <option value="Chưa bắt đầu" class="bg-secondary text-white">Chưa bắt đầu</option>
@@ -84,8 +84,8 @@
                         <option value="Đã hủy" class="bg-danger text-white">Đã hủy</option>
                     </select>
                 </td>
-                <td><input type="date"></td>
-                <td><input type="date"></td>
+                <td><input class="form-control" type="date"></td>
+                <td><input class="form-control" type="date"></td>
                 <td><button class="btn btn-danger btn-sm" onclick="xoaDong(this)" disabled>Xóa</button></td>
             `;
             tbody.appendChild(dongMoi);
@@ -126,8 +126,15 @@
                 "Hoàn thành": "bg-success text-white",
                 "Đã hủy": "bg-danger text-white"
             };
+            // Lấy ô <td> chứa thẻ <select>
+            let td = select.closest("td");
 
-            // Xóa tất cả class màu trước đó
+            // Xóa tất cả class màu trước đó của ô <td>
+            td.className = "";
+            // Thêm class màu mới cho ô <td>
+            td.className = colors[select.value];
+
+            // Đặt lại class của thẻ <select> để không bị ảnh hưởng bởi màu nền
             select.className = "form-select " + colors[select.value];
         }
     </script>

@@ -22,7 +22,7 @@ app.post('/login', async (req, res) => {
         let pool = await sql.connect(dbConfig);
         let result = await pool.request()
             .input('username', sql.VarChar, username)
-            .query('SELECT * FROM Account WHERE username = @username');
+            .query('SELECT * FROM Accounts WHERE LOWER(Username) = LOWER(@username)');
 
         if (result.recordset.length === 0) {
             return res.status(401).json({ message: 'Đăng nhập thất bại: sai tên tài khoản hoặc mật khẩu' });
@@ -30,16 +30,16 @@ app.post('/login', async (req, res) => {
         const account = result.recordset[0];
 
         // So sánh trực tiếp mật khẩu plaintext
-        if (password !== account.password) {
+        if (password !== account.Password) {
             return res.status(401).json({ message: 'Đăng nhập thất bại: sai tên tài khoản hoặc mật khẩu' });
         }
 
-        if (!account.is_active) {
+        if (!account.IsActive) {
             return res.status(403).json({ message: 'Tài khoản đã bị khóa' });
         }
 
         const token = jwt.sign(
-            { id: account.id, username: account.username, role: account.role },
+            { id: account.Id, username: account.Username, role: account.RoleId },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -47,7 +47,7 @@ app.post('/login', async (req, res) => {
         res.json({
             message: 'Đăng nhập thành công',
             token: token,
-            role: account.role
+            role: account.RoleId
         });
     } catch (error) {
         console.error(error);
@@ -78,12 +78,13 @@ app.get('/protected', authenticateToken, (req, res) => {
     res.json({
         message: 'Đây là dữ liệu bảo vệ',
         account: {
-            id: req.account.id,
-            username: req.account.username,
-            role: req.account.role
+            id: req.account.Id,
+            username: req.account.Username,
+            role: req.account.RoleId
         }
     });
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

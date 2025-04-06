@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết nhóm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/group-page.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .member-card {
+            transition: all 0.3s ease;
+        }
+
+        .member-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .member-role {
+            font-size: 0.9em;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .role-leader {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .role-member {
+            background-color: #6c757d;
+            color: #fff;
+            font-size: 1.1em;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-12">
+                <a href="group-page.html" class="btn btn-outline-primary mb-3">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title" id="groupName"></h3>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <p><strong>Môn học:</strong> <span id="subjectName"></span></p>
+                                <p><strong>Đề tài:</strong> <span id="projectName"></span></p>
+                                <p><strong>Trạng thái:</strong> <span id="groupStatus"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Số thành viên:</strong> <span id="totalMembers"></span></p>
+                                <p><strong>Ngày thuyết trình:</strong> <span id="presentationDate"></span></p>
+                                <p><strong>Ghi chú:</strong> <span id="groupNotes"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3">Thành viên nhóm</h4>
+                <div class="row" id="membersList">
+                    <!-- Danh sách thành viên sẽ được thêm vào đây bằng JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hàm khởi tạo trang
+        async function initGroupDetail() {
+            try {
+                // Lấy ID nhóm từ URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const groupId = urlParams.get('id');
+
+                if (!groupId) {
+                    throw new Error('Missing group ID');
+                }
+
+                // Lấy dữ liệu từ API
+                const response = await fetch(`/api/groups/${groupId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch group details');
+                }
+
+                const group = await response.json();
+                renderGroupDetails(group);
+
+            } catch (error) {
+                console.error('Error initializing group detail:', error);
+                alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.');
+            }
+        }
+
+        // Hàm hiển thị chi tiết nhóm
+        function renderGroupDetails(group) {
+            // Hiển thị thông tin cơ bản
+            document.getElementById('groupName').textContent = group.groupName;
+            document.getElementById('className').textContent = group.className;
+            document.getElementById('subjectName').textContent = group.subjectName;
+            document.getElementById('subjectCode').textContent = group.subjectCode;
+            document.getElementById('groupDescription').textContent = group.description || 'Không có mô tả';
+            document.getElementById('createdAt').textContent = formatDate(group.createdAt);
+            document.getElementById('status').textContent = getStatusText(group.status);
+
+            // Hiển thị thông tin dự án
+            if (group.projectId) {
+                document.getElementById('projectInfo').style.display = 'block';
+                document.getElementById('projectName').textContent = group.projectName;
+                document.getElementById('projectDescription').textContent = group.projectDescription || 'Không có mô tả';
+                document.getElementById('deadline').textContent = formatDate(group.deadline);
+            } else {
+                document.getElementById('projectInfo').style.display = 'none';
+            }
+
+            // Hiển thị danh sách thành viên
+            const membersContainer = document.getElementById('membersList');
+            membersContainer.innerHTML = '';
+
+            group.members.forEach(member => {
+                const memberCard = document.createElement('div');
+                memberCard.className = 'col-md-6 col-lg-4 mb-4';
+
+                memberCard.innerHTML = `
+                    <div class="card member-card">
+                        <div class="card-body">
+                            <h5 class="card-title">${member.fullName}</h5>
+                            <p class="card-text text-muted">${member.email}</p>
+                            <div class="member-info">
+                                <span class="badge ${getRoleBadgeClass(member.memberRole)}">
+                                    ${getRoleText(member.memberRole)}
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-calendar"></i> Tham gia: ${formatDate(member.joinedAt)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                membersContainer.appendChild(memberCard);
+            });
+        }
+
+        // Hàm định dạng ngày tháng
+        function formatDate(dateString) {
+            if (!dateString) return 'Chưa có';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Hàm lấy text trạng thái
+        function getStatusText(status) {
+            const statusMap = {
+                'active': 'Đang hoạt động',
+                'completed': 'Đã hoàn thành',
+                'pending': 'Đang chờ',
+                'cancelled': 'Đã hủy'
+            };
+            return statusMap[status] || status;
+        }
+
+        // Hàm lấy class cho badge vai trò
+        function getRoleBadgeClass(role) {
+            const roleMap = {
+                'leader': 'bg-primary',
+                'member': 'bg-secondary',
+                'observer': 'bg-info'
+            };
+            return roleMap[role] || 'bg-secondary';
+        }
+
+        // Hàm lấy text vai trò
+        function getRoleText(role) {
+            const roleMap = {
+                'leader': 'Nhóm trưởng',
+                'member': 'Thành viên',
+                'observer': 'Quan sát viên'
+            };
+            return roleMap[role] || role;
+        }
+
+        // Khởi tạo trang khi DOM đã sẵn sàng
+        document.addEventListener('DOMContentLoaded', initGroupDetail);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phân công đề tài</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="/css/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
@@ -18,33 +18,20 @@
             <div class="col-md-10 mt-4">
                 <div class="main-panel p-4">
                     <div class="header-panel">
-                        <h5 class="header-panel-title">Dự án gần đây</h5>
+                        <h5 class="header-panel-title">Dự án gần đây
+                            <button class="btn btn-primary add-project-btn" data-bs-toggle="modal"
+                                data-bs-target="#addProjectModal" title="Thêm dự án mới"><i
+                                    class="fa-solid fa-plus"></i></button>
+                        </h5>
                     </div>
-                    <div class="d-flex gap-3 body-panel">
-                        <a class="card card-item" href="pages/work-space.html" style="width: 18rem;">
-                            <img src="images/item-image.jpg" class="card-img-top" alt="Project Image">
-                            <div class="card-body">
-                                <h6 class="card-title">Nhập môn công nghệ phần mềm</h6>
-                                <p class="card-text">Phân công đề tài môn học cho sinh viên.</p>
-                                <div class="progress">
-                                    <div class="progress-bar bg-success" style="width: 80%"></div>
-                                </div>
-                            </div>
-                        </a>
-                        <a class="card card-item" href="pages/work-space.html" style="width: 18rem;">
-                            <img src="images/item-image.jpg" class="card-img-top" alt="Project Image">
-                            <div class="card-body">
-                                <h6 class="card-title">Lập trình web</h6>
-                                <p class="card-text">Quản lí tour du lịch</p>
-                                <div class="progress">
-                                    <div class="progress-bar" style="width: 30%"></div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                    <div class="d-flex gap-3 body-panel" id="projectList"></div>
+                    <button id="viewAllProjectsBtn" class="btn btn-secondary mt-3" data-bs-toggle="modal"
+                        data-bs-target="#allProjectsModal" style="display: none;">
+                        Xem tất cả dự án
+                    </button>
 
                     <!-- Phản hồi của giảng viên -->
-                    <h5 class="mt-4">Phản hồi của giảng viên</h5>
+                    <!-- <h5 class="mt-4">Phản hồi của giảng viên</h5>
                     <div class="border p-3 rounded bg-light mb-2">
                         <strong>Nguyễn Văn A</strong> <small class="text-muted">14 giờ trước</small>
                         <p>cmt</p>
@@ -52,7 +39,17 @@
                     <div class="border p-3 rounded bg-light">
                         <strong>Nguyễn Văn A</strong> <small class="text-muted">14 giờ trước</small>
                         <p>cmt</p>
+                    </div> -->
+
+                    <!-- Form bình luận -->
+                    <div id="commentForm">
+                        <h5 class="mt-4">Thêm bình luận</h5>
+                        <textarea id="commentText" class="form-control mb-2" rows="3"></textarea>
+                        <button class="btn btn-primary" onclick="submitComment()">Gửi bình luận</button>
                     </div>
+
+                    <h5 class="mt-4">Phản hồi của giảng viên</h5>
+                    <div id="commentsContainer"></div>
                 </div>
             </div>
 
@@ -67,10 +64,229 @@
                     <div class="progress-bar" style="width: 50%"></div>
                 </div>
             </div>
+
+            <!-- Modal thêm dự án -->
+            <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addProjectModalLabel">Thêm Dự Án Mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="projectForm">
+                                <div class="mb-3">
+                                    <label for="subjectId" class="form-label">Mã môn học</label>
+                                    <input type="text" class="form-control" id="subjectId" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subjectName" class="form-label">Tên môn học</label>
+                                    <input type="text" class="form-control" id="subjectName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="projectName" class="form-label">Tên dự án</label>
+                                    <input type="text" class="form-control" id="projectName" required>
+                                </div>
+                                <div id="errorMessage" class="text-danger mb-2" style="display: none;"></div>
+                                <button type="button" class="btn btn-primary" onclick="saveProject()">Lưu dự án</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal hiển thị tất cả dự án -->
+            <div class="modal fade" id="allProjectsModal" tabindex="-1" aria-labelledby="allProjectsModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="allProjectsModalLabel">Tất Cả Dự Án</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="allProjectsContainer" class="d-flex flex-wrap gap-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Bạn có chắc muốn xóa dự án này không?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<script>
+    function saveProject() {
+        let subjectId = document.getElementById("subjectId").value;
+        let subjectName = document.getElementById("subjectName").value;
+        let projectName = document.getElementById("projectName").value;
+        let errorMessage = document.getElementById("errorMessage");
+        let projectModal = document.getElementById("addProjectModal");
+        let mode = projectModal.getAttribute("data-mode") || "add"; // Mặc định là add
+        if (!subjectId || !subjectName || !projectName) {
+            errorMessage.textContent = "Vui lòng nhập đầy đủ thông tin";
+            errorMessage.style.display = "block";
+            return;
+        }
+
+        errorMessage.style.display = "none";
+        let projectList = document.getElementById('projectList');
+        if (mode == "edit") {
+            let projectToEdit = projectModal.projectToEdit; // Lấy dự án đang chỉnh sửa
+            projectToEdit.querySelector('.card-title').textContent = subjectName;
+            projectToEdit.querySelector('.card-text:not(.create-date)').textContent = projectName;
+        }
+        else {
+            let newProject = document.createElement('a');
+            newProject.className = 'card card-item';
+            newProject.href = "pages/work-space.html";
+            newProject.style.width = "18rem";
+
+            const createdDate = new Date();
+            newProject.innerHTML = `
+                <img src="images/item-image.jpg" class="card-img-top" alt="Project Image">
+                <div class="card-body">
+                    <h6 class="card-title">${subjectName}</h6>
+                    <p class="card-text">${projectName}</p>
+                    <p class="card-text create-date">Ngày tạo: ${createdDate.toLocaleDateString()}</p>
+                    <button class="btn btn-warning btn-sm edit-btn" onclick="editProject(this, event)">
+                        <i class="fa-solid fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-btn" onclick="deleteProject(this, event)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+
+            projectList.appendChild(newProject);
+        }
+        updateProjectListDisplay();
+        updateAllProjectsModal();
+
+        var modal = bootstrap.Modal.getInstance(document.getElementById("addProjectModal"));
+        modal.hide();
+
+        document.getElementById("projectForm").reset();
+        projectModal.removeAttribute("data-mode"); //Reset modal
+    }
+
+    function updateProjectListDisplay() {
+        let projectList = document.getElementById('projectList');
+        let projects = projectList.children;
+        let viewAllBtn = document.getElementById('viewAllProjectsBtn');
+
+        for (let i = 0; i < projects.length; i++) {
+            if (i < 5) {
+                projects[i].style.display = "block";
+            } else {
+                projects[i].style.display = "none";
+            }
+        }
+        viewAllBtn.style.display = projects.length > 5 ? "block" : "none";
+    }
+
+    function updateAllProjectsModal() {
+        let projectList = document.getElementById('projectList').children;
+        let allProjectsContainer = document.getElementById('allProjectsContainer');
+        allProjectsContainer.innerHTML = "";
+        for (let project of projectList) {
+            let cloneProject = project.cloneNode(true);
+            cloneProject.style.display = "block";
+            allProjectsContainer.appendChild(cloneProject);
+        }
+    }
+
+    function deleteProject(button, event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let projectInModal = button.closest('#allProjectsContainer .card-item');
+        let projectInList = button.closest('#projectList .card-item');
+
+        let projectToDelete;
+        if (projectInModal) {
+            // Nếu xóa từ modal, tìm phần tử tương ứng trong projectList
+            let projectTitle = projectInModal.querySelector('.card-title').textContent;
+            let projectText = projectInModal.querySelector('.card-text:not(.create-date)').textContent;
+            let projectList = document.getElementById('projectList');
+            for (let project of projectList.children) {
+                if (project.querySelector('.card-title').textContent === projectTitle &&
+                    project.querySelector('.card-text:not(.create-date)').textContent === projectText) {
+                    projectToDelete = project;
+                    break;
+                }
+            }
+        } else if (projectInList) {
+            // Nếu xóa từ danh sách chính
+            projectToDelete = projectInList;
+        }
+
+        if (projectToDelete) {
+            let confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            confirmModal.show();
+            document.getElementById('confirmDeleteBtn').onclick = function () {
+                let projectList = document.getElementById('projectList');
+                projectList.removeChild(projectToDelete);
+                updateProjectListDisplay();
+                updateAllProjectsModal();
+                confirmModal.hide();
+            };
+        }
+    }
+
+    function editProject(button, event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let project = button.closest('.card-item');
+        let subjectName = project.querySelector('.card-title').textContent;
+        let projectName = project.querySelector('.card-text:not(.create-date)').textContent;
+        let modal = document.getElementById("addProjectModal");
+        modal.setAttribute("data-mode", "edit"); // Chuyển sang chế độ chỉnh sửa
+        modal.projectToEdit = project; // Lưu dự án cần chỉnh sửa vào modal
+
+        document.getElementById("subjectId").value = ""; // Không lưu subjectId, có thể thêm nếu cần
+        document.getElementById("subjectName").value = subjectName;
+        document.getElementById("projectName").value = projectName;
+        document.getElementById("addProjectModalLabel").textContent = "Chỉnh sửa dự án";
+
+        let bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Khởi tạo tooltip (nếu cần)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Kiểm tra vai trò người dùng
+        const role = localStorage.getItem("role");
+        console.log("User Role:", role);
+        if (role === "1") {
+            document.getElementById("commentForm").style.display = "none";
+        }
+    });
+</script>
 
 </html>

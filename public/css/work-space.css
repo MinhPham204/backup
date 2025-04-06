@@ -1,3 +1,51 @@
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Định nghĩa chiều rộng cho từng cột */
+th:nth-child(1),
+td:nth-child(1) {
+    width: 5%;
+}
+
+/* Cột checkbox */
+th:nth-child(2),
+td:nth-child(2) {
+    width: 25%;
+}
+
+/* Cột Công việc */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 20%;
+}
+
+/* Cột Người thực hiện */
+th:nth-child(4),
+td:nth-child(4) {
+    width: 15%;
+}
+
+/* Cột Trạng thái */
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6) {
+    width: 15%;
+}
+
+/* Cột Ngày bắt đầu & Ngày đến hạn */
+th:nth-child(7),
+td:nth-child(7) {
+    width: 10%;
+}
+
+.td-work:focus {
+    outline: none;
+}
+
+
 .status-hoan-thanh {
     background-color: #28a745;
     color: white;
@@ -26,6 +74,10 @@
     opacity: 0.6;
 }
 
+.btn-addline:focus {
+    border: 0;
+}
+
 .btn-del-table {
     background: #fff;
     border: 0 solid #fff !important;
@@ -37,9 +89,25 @@
 }
 
 .form-select {
-    padding: 0 !important;
+    border: 0 !important;
+
+}
+
+.form-select:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .work-title:focus {
     outline: none;
 }
+
+.td-status:nth-child(1) {
+    padding: 0 !important;
+}
+
+.deadline:focus {
+    outline: none !important;
+}
+
+.work-status {}

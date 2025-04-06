@@ -70,6 +70,7 @@
                 if (response.ok) {
                     // Lưu token vào localStorage để sử dụng cho các trang bảo vệ
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role);
                     // Chuyển hướng đến index.html
                     window.location.href = '/index.html';
                 } else {
