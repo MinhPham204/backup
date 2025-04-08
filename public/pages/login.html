@@ -57,29 +57,40 @@
             const messageElement = document.getElementById('message');
 
             try {
+                console.log('Đang gửi yêu cầu đăng nhập...');
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, password }),
+                    body: JSON.stringify({ username, password })
                 });
 
-                const data = await response.json(); // Dùng await để đợi cho quá trình đọc json hoàn tất
+                console.log('Nhận được response:', response.status);
+                const data = await response.json();
+                console.log('Dữ liệu response:', data);
 
-                if (response.ok) {
-                    // Lưu token vào localStorage để sử dụng cho các trang bảo vệ
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('role', data.role);
-                    // Chuyển hướng đến index.html
-                    window.location.href = '/index.html';
-                } else {
-                    // Hiển thị thông báo lỗi từ server
-                    messageElement.innerText = data.message || 'Đăng nhập thất bại.'; // Nếu không có message thì hiển thị Đăng nhập thất bại
+                if (!response.ok) {
+                    throw new Error(data.message || 'Có lỗi xảy ra');
+                }
+
+                // Lưu token vào localStorage
+                localStorage.setItem('token', data.token);
+                console.log('Token saved:', data.token);
+
+                // Kiểm tra token đã được lưu
+                const savedToken = localStorage.getItem('token');
+                console.log('Token after save:', savedToken);
+
+                // Chuyển hướng dựa vào role
+                if (data.role === 1) { // Admin
+                    window.location.href = '/group-page.html';
+                } else if (data.role === 2) { // Teacher
+                    window.location.href = '/group-page.html';
                 }
             } catch (error) {
-                console.error('Error:', error);
-                messageElement.innerText = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                console.error('Lỗi đăng nhập:', error);
+                messageElement.innerText = error.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
             }
         });
 

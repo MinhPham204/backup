@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi tiết nhóm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/group-page.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/group-detail.css" rel="stylesheet">
     <style>
         .member-card {
             transition: all 0.3s ease;
@@ -39,132 +39,97 @@
 </head>
 
 <body>
-    <div class="container py-4">
-        <div class="row">
-            <div class="col-12">
-                <a href="group-page.html" class="btn btn-outline-primary mb-3">
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <a href="/group-page.html" class="btn btn-outline-primary">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-12">
+            <div class="col-md-8">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h3 class="card-title" id="groupName"></h3>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <p><strong>Môn học:</strong> <span id="subjectName"></span></p>
-                                <p><strong>Đề tài:</strong> <span id="projectName"></span></p>
-                                <p><strong>Trạng thái:</strong> <span id="groupStatus"></span></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Số thành viên:</strong> <span id="totalMembers"></span></p>
-                                <p><strong>Ngày thuyết trình:</strong> <span id="presentationDate"></span></p>
-                                <p><strong>Ghi chú:</strong> <span id="groupNotes"></span></p>
-                            </div>
+                        <div class="group-info">
+                            <p><i class="fas fa-graduation-cap"></i> Lớp: <span id="className"></span></p>
+                            <p><i class="fas fa-book"></i> Môn học: <span id="subjectName"></span></p>
+                            <p><i class="fas fa-calendar"></i> Ngày tạo: <span id="createdAt"></span></p>
+                            <p><i class="fas fa-info-circle"></i> Trạng thái: <span id="status"></span></p>
+                        </div>
+                        <div class="description">
+                            <h5>Mô tả</h5>
+                            <p id="description"></p>
+                        </div>
+                        <div class="project-info" id="projectInfo">
+                            <h5>Thông tin dự án</h5>
+                            <p><strong>Tên dự án:</strong> <span id="projectName"></span></p>
+                            <p><strong>Mô tả:</strong> <span id="projectDescription"></span></p>
+                            <p><strong>Hạn nộp:</strong> <span id="deadline"></span></p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-12">
-                <h4 class="mb-3">Thành viên nhóm</h4>
-                <div class="row" id="membersList">
-                    <!-- Danh sách thành viên sẽ được thêm vào đây bằng JavaScript -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Danh sách thành viên</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Họ tên</th>
+                                        <th>Vai trò</th>
+                                        <th>Ngày tham gia</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="membersList">
+                                    <!-- Members will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Hàm khởi tạo trang
-        async function initGroupDetail() {
-            try {
-                // Lấy ID nhóm từ URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const groupId = urlParams.get('id');
-
-                if (!groupId) {
-                    throw new Error('Missing group ID');
-                }
-
-                // Lấy dữ liệu từ API
-                const response = await fetch(`/api/groups/${groupId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch group details');
-                }
-
-                const group = await response.json();
-                renderGroupDetails(group);
-
-            } catch (error) {
-                console.error('Error initializing group detail:', error);
-                alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.');
+        // Kiểm tra đăng nhập
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            console.log('Checking auth, token:', token ? 'Token exists' : 'No token');
+            
+            if (!token) {
+                console.log('No token found, redirecting to login page');
+                window.location.href = '/login.html';
+                return null;
             }
+            return token;
         }
 
-        // Hàm hiển thị chi tiết nhóm
-        function renderGroupDetails(group) {
-            // Hiển thị thông tin cơ bản
-            document.getElementById('groupName').textContent = group.groupName;
-            document.getElementById('className').textContent = group.className;
-            document.getElementById('subjectName').textContent = group.subjectName;
-            document.getElementById('subjectCode').textContent = group.subjectCode;
-            document.getElementById('groupDescription').textContent = group.description || 'Không có mô tả';
-            document.getElementById('createdAt').textContent = formatDate(group.createdAt);
-            document.getElementById('status').textContent = getStatusText(group.status);
-
-            // Hiển thị thông tin dự án
-            if (group.projectId) {
-                document.getElementById('projectInfo').style.display = 'block';
-                document.getElementById('projectName').textContent = group.projectName;
-                document.getElementById('projectDescription').textContent = group.projectDescription || 'Không có mô tả';
-                document.getElementById('deadline').textContent = formatDate(group.deadline);
-            } else {
-                document.getElementById('projectInfo').style.display = 'none';
+        // Xử lý lỗi response
+        async function handleResponse(response) {
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.log('Response error:', errorData);
+                
+                if (response.status === 401 || response.status === 403) {
+                    console.log('Authentication error, removing token and redirecting');
+                    localStorage.removeItem('token'); // Xóa token không hợp lệ
+                    window.location.href = '/login.html';
+                    return null;
+                }
+                throw new Error(errorData.message || 'Có lỗi xảy ra');
             }
-
-            // Hiển thị danh sách thành viên
-            const membersContainer = document.getElementById('membersList');
-            membersContainer.innerHTML = '';
-
-            group.members.forEach(member => {
-                const memberCard = document.createElement('div');
-                memberCard.className = 'col-md-6 col-lg-4 mb-4';
-
-                memberCard.innerHTML = `
-                    <div class="card member-card">
-                        <div class="card-body">
-                            <h5 class="card-title">${member.fullName}</h5>
-                            <p class="card-text text-muted">${member.email}</p>
-                            <div class="member-info">
-                                <span class="badge ${getRoleBadgeClass(member.memberRole)}">
-                                    ${getRoleText(member.memberRole)}
-                                </span>
-                                <span class="text-muted">
-                                    <i class="fas fa-calendar"></i> Tham gia: ${formatDate(member.joinedAt)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                membersContainer.appendChild(memberCard);
-            });
+            return response.json();
         }
 
-        // Hàm định dạng ngày tháng
+        // Format ngày tháng
         function formatDate(dateString) {
-            if (!dateString) return 'Chưa có';
             const date = new Date(dateString);
             return date.toLocaleDateString('vi-VN', {
                 year: 'numeric',
@@ -173,39 +138,106 @@
             });
         }
 
-        // Hàm lấy text trạng thái
+        // Xác định trạng thái nhóm
         function getStatusText(status) {
-            const statusMap = {
-                'active': 'Đang hoạt động',
-                'completed': 'Đã hoàn thành',
-                'pending': 'Đang chờ',
-                'cancelled': 'Đã hủy'
-            };
-            return statusMap[status] || status;
+            switch (status) {
+                case 'TRỐNG':
+                    return 'Chưa có thành viên';
+                case 'ĐANG LÀM':
+                    return 'Đang hoạt động';
+                case 'ĐÃ BÁO CÁO':
+                    return 'Đã hoàn thành';
+                default:
+                    return 'Không xác định';
+            }
         }
 
-        // Hàm lấy class cho badge vai trò
-        function getRoleBadgeClass(role) {
-            const roleMap = {
-                'leader': 'bg-primary',
-                'member': 'bg-secondary',
-                'observer': 'bg-info'
-            };
-            return roleMap[role] || 'bg-secondary';
-        }
-
-        // Hàm lấy text vai trò
+        // Xác định vai trò thành viên
         function getRoleText(role) {
-            const roleMap = {
-                'leader': 'Nhóm trưởng',
-                'member': 'Thành viên',
-                'observer': 'Quan sát viên'
-            };
-            return roleMap[role] || role;
+            switch (role) {
+                case 'NHÓM TRƯỞNG':
+                    return 'Trưởng nhóm';
+                case 'THÀNH VIÊN':
+                    return 'Thành viên';
+                default:
+                    return 'Không xác định';
+            }
         }
 
-        // Khởi tạo trang khi DOM đã sẵn sàng
-        document.addEventListener('DOMContentLoaded', initGroupDetail);
+        // Render thông tin nhóm
+        function renderGroupDetails(group) {
+            document.getElementById('groupName').textContent = group.GroupName;
+            document.getElementById('className').textContent = group.ClassName;
+            document.getElementById('subjectName').textContent = `${group.SubjectName} (${group.SubjectCode})`;
+            document.getElementById('createdAt').textContent = formatDate(group.PresentationDate);
+            document.getElementById('status').textContent = getStatusText(group.GroupStatus);
+            document.getElementById('description').textContent = group.Notes || 'Không có mô tả';
+
+            const projectInfo = document.getElementById('projectInfo');
+            if (group.ProjectName) {
+                document.getElementById('projectName').textContent = group.ProjectName;
+                document.getElementById('projectDescription').textContent = group.projectDescription || 'Không có mô tả';
+                document.getElementById('deadline').textContent = formatDate(group.deadline);
+                projectInfo.style.display = 'block';
+            } else {
+                projectInfo.style.display = 'none';
+            }
+
+            const membersList = document.getElementById('membersList');
+            membersList.innerHTML = '';
+            group.members.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${member.studentName}</td>
+                    <td>
+                        <span class="member-role ${member.role === 'NHÓM TRƯỞNG' ? 'role-leader' : 'role-member'}">
+                            ${getRoleText(member.role)}
+                        </span>
+                        ${member.Score ? `<br><small>Điểm: ${member.Score}</small>` : ''}
+                        ${member.Notes ? `<br><small>Ghi chú: ${member.Notes}</small>` : ''}
+                    </td>
+                    <td>Thành viên #${member.joinOrder}</td>
+                `;
+                membersList.appendChild(row);
+            });
+        }
+
+        // Load thông tin nhóm
+        async function loadGroupDetails() {
+            try {
+                const token = checkAuth();
+                if (!token) return;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const groupId = urlParams.get('id');
+
+                if (!groupId) {
+                    throw new Error('Group ID is required');
+                }
+
+                console.log('Loading group details with token, groupId:', groupId);
+                const response = await fetch(`/api/groups/${groupId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const group = await handleResponse(response);
+                if (!group) return;
+
+                console.log('Group details loaded:', group);
+                renderGroupDetails(group);
+            } catch (error) {
+                console.error('Error loading group details:', error);
+                alert('Có lỗi xảy ra khi tải thông tin nhóm: ' + error.message);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadGroupDetails();
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
