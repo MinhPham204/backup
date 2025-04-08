@@ -43,16 +43,16 @@
 
     <script>
         // Kiểm tra đăng nhập
-        // function checkAuth() {
-        //     const token = localStorage.getItem('token');
-        //     console.log('Checking auth, token:', token ? 'Token exists' : 'No token');
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            console.log('Checking auth, token:', token ? 'Token exists' : 'No token');
 
-        //     if (!token) {
-        //         window.location.href = '/login.html';
-        //         return false;
-        //     }
-        //     return true;
-        // }
+            if (!token) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
 
         // Hàm gửi request với token
         async function fetchWithAuth(url, options = {}) {
