@@ -1,18 +1,14 @@
 [
-    {
-        "username": "nhatminh2004",
-        "password": "123456",
-        "roleId": 1,
-        "isActive": true,
-        "createdAt": "2025-03-24T12:00:00.000Z",
-        "updatedAt": "2025-03-24T12:00:00.000Z"
-    },
-    {
-        "username": "lecturer1",
-        "password": "123456789",
-        "roleId": 2,
-        "isActive": true,
-        "createdAt": "2025-03-24T12:00:00.000Z",
-        "updatedAt": "2025-03-24T12:00:00.000Z"
-    }
+  {
+    "id": "GV010",
+    "username": "lecturer010",
+    "password": "123456789",
+    "roleId": 1
+  },
+  {
+    "id": "SV010",
+    "username": "sinhvien010",
+    "password": "1234533216789",
+    "roleId": 1
+  }
 ]

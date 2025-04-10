@@ -2,6 +2,7 @@ const express = require('express');
 const sql = require('mssql');
 const jwt = require('jsonwebtoken');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const dbConfig = require('./config/dbconfig');
 
 const app = express();
@@ -41,9 +42,10 @@ app.post('/login', async (req, res) => {
             });
         }
         const account = result.recordset[0];
-
-        // So sánh trực tiếp mật khẩu plaintext
-        if (password !== account.Password) {
+        const isMatch = await bcrypt.compare(password, account.Password);
+        if (!isMatch) {
+            // So sánh trực tiếp mật khẩu plaintext
+            // if (password !== account.Password) {
             console.log('Invalid password for user:', username);
             return res.status(401).json({
                 error: 'Unauthorized',
@@ -60,7 +62,7 @@ app.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: account.Id, username: account.Username, role: account.RoleId },
+            { accountId: account.Id, username: account.Username, role: account.RoleId },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
@@ -80,40 +82,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Middleware kiểm tra token
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    console.log('Auth header:', authHeader); // Log để debug
-
-    if (!authHeader) {
-        console.log('No auth header found');
-        return res.status(401).json({
-            error: 'Unauthorized',
-            message: 'Không tìm thấy token xác thực. Vui lòng đăng nhập lại.'
-        });
-    }
-
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-        console.log('No token found in auth header');
-        return res.status(401).json({
-            error: 'Unauthorized',
-            message: 'Token không hợp lệ. Vui lòng đăng nhập lại.'
-        });
-    }
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            console.log('Token verification failed:', err.message);
-            return res.status(403).json({
-                error: 'Forbidden',
-                message: 'Token đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.'
-            });
-        }
-        req.user = user;
-        next();
-    });
-};
 
 // Route bảo vệ (dữ liệu JSON)
 app.get('/protected', (req, res) => {
@@ -126,82 +94,69 @@ app.get('/protected', (req, res) => {
         }
     });
 });
+// Đổi mật khẩu
+app.post('/change-password', async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const authHeader = req.headers['authorization'];
+
+        if (!authHeader) {
+            return res.status(401).json({ message: 'Thiếu token' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Token không hợp lệ' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+        } catch (err) {
+            return res.status(403).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+        }
+
+        const accountId = decoded.accountId;
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: 'Vui lòng nhập mật khẩu cũ và mật khẩu mới' });
+        }
+
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request()
+            .input('id', sql.VarChar, accountId)
+            .query('SELECT * FROM Accounts WHERE Id = @id');
+
+        const account = result.recordset[0];
+        if (!account) return res.status(404).json({ message: 'Không tìm thấy tài khoản' });
+
+        const isMatch = await bcrypt.compare(oldPassword, account.Password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Mật khẩu cũ không đúng' });
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await pool.request()
+            .input('id', sql.VarChar, accountId)
+            .input('newPassword', sql.VarChar, hashedNewPassword)
+            .input('updatedAt', sql.DateTime, new Date())
+            .query(`
+                UPDATE Accounts
+                SET Password = @newPassword, UpdatedAt = @updatedAt
+                WHERE Id = @id
+            `);
+
+        res.json({ message: 'Đổi mật khẩu thành công' });
+
+    } catch (error) {
+        console.error('Lỗi đổi mật khẩu:', error.message);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
 
 // Import và sử dụng groupRoutes
 const groupRoutes = require('./routes/groupRoutes');
-app.use('/api/groups', groupRoutes);
-
-// API endpoint để lấy danh sách lớp
-app.get('/api/classes', async (req, res) => {
-    try {
-        console.log('Connecting to database...');
-        let pool = await sql.connect(dbConfig);
-        console.log('Connected to database');
-
-        console.log('Executing query...');
-        const result = await pool.request()
-            .query('SELECT Id as id, ClassName as className FROM Classes ORDER BY ClassName');
-        console.log('Query executed successfully');
-        console.log('Found classes:', result.recordset.length);
-
-        res.json(result.recordset);
-    } catch (error) {
-        console.error('Error in /api/classes:', error);
-        res.status(500).json({
-            error: 'Internal server error',
-            message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-    } finally {
-        try {
-            await sql.close();
-            console.log('Database connection closed');
-        } catch (err) {
-            console.error('Error closing database connection:', err);
-        }
-    }
-});
-
-// API endpoint để lấy danh sách môn học
-app.get('/api/subjects', async (req, res) => {
-    try {
-        console.log('Connecting to database...');
-        let pool = await sql.connect(dbConfig);
-        console.log('Connected to database');
-
-        console.log('Executing query...');
-        const result = await pool.request()
-            .query('SELECT Id as id, SubjectName as subjectName, SubjectCode as subjectCode FROM Subjects ORDER BY SubjectName');
-        console.log('Query executed successfully');
-        console.log('Found subjects:', result.recordset.length);
-
-        res.json(result.recordset);
-    } catch (error) {
-        console.error('Error in /api/subjects:', error);
-        res.status(500).json({
-            error: 'Internal server error',
-            message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        });
-    } finally {
-        try {
-            await sql.close();
-            console.log('Database connection closed');
-        } catch (err) {
-            console.error('Error closing database connection:', err);
-        }
-    }
-});
-
-// Route cho trang group-page
-app.get('/group-page.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'pages', 'group-page.html'));
-});
-
-// Route cho trang group-detail
-app.get('/group-detail.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'pages', 'group-detail.html'));
-});
+app.use('/api', groupRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
