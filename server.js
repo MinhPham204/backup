@@ -3,6 +3,7 @@ const sql = require('mssql');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 const dbConfig = require('./config/dbconfig');
 
 const app = express();
@@ -15,6 +16,22 @@ const JWT_SECRET = '123421152';
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'pages', 'login.html'));
 });
+// Route bảo vệ (dữ liệu JSON)
+app.get('/protected', (req, res) => {
+    res.json({
+        message: 'Đây là dữ liệu bảo vệ',
+        account: {
+            id: req.user.Id,
+            username: req.user.Username,
+            role: req.user.RoleId
+        }
+    });
+});
+//Route đổi mật khẩu
+app.get('/change-password', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'pages', 'change-password.html'));
+});
+
 
 // Route đăng nhập
 app.post('/login', async (req, res) => {
@@ -82,18 +99,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
-// Route bảo vệ (dữ liệu JSON)
-app.get('/protected', (req, res) => {
-    res.json({
-        message: 'Đây là dữ liệu bảo vệ',
-        account: {
-            id: req.user.Id,
-            username: req.user.Username,
-            role: req.user.RoleId
-        }
-    });
-});
 // Đổi mật khẩu
 app.post('/change-password', async (req, res) => {
     try {
@@ -148,11 +153,27 @@ app.post('/change-password', async (req, res) => {
 
         res.json({ message: 'Đổi mật khẩu thành công' });
 
+        // Lưu mật khẩu mới vào file users
+        const usersPath = path.join(__dirname, 'users.json');
+        let users = [];
+        if (fs.existsSync(usersPath)) {
+            users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+        }
+
+        // Cập nhật mật khẩu mới cho user
+        const userIndex = users.findIndex(u => u.id === account.Id);
+        if (userIndex !== -1) {
+            users[userIndex].password = newPassword;
+            // Ghi lại vào file
+            fs.writeFileSync(usersPath, JSON.stringify(users, null, 2), 'utf8');
+        }
+
     } catch (error) {
         console.error('Lỗi đổi mật khẩu:', error.message);
         res.status(500).json({ message: 'Lỗi server' });
     }
 });
+
 
 // Import và sử dụng groupRoutes
 const groupRoutes = require('./routes/groupRoutes');

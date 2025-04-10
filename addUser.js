@@ -49,5 +49,4 @@ async function addUser(id, username, password, roleId) {
 }
 
 
-// 👉 Gọi hàm: nhập ID tùy bạn
 addUser('SV010', 'sinhvien010', '1234533216789', 1); // id, username, password, roleId
